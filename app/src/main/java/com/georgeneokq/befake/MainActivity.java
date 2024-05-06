@@ -2,11 +2,18 @@ package com.georgeneokq.befake;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.camera.core.Camera;
+import androidx.camera.core.CameraInfoUnavailableException;
 import androidx.camera.core.CameraSelector;
 import androidx.camera.core.ConcurrentCamera;
+import androidx.camera.core.DisplayOrientedMeteringPointFactory;
+import androidx.camera.core.FocusMeteringAction;
 import androidx.camera.core.ImageCapture;
 import androidx.camera.core.ImageCaptureException;
+import androidx.camera.core.MeteringPoint;
+import androidx.camera.core.MeteringPointFactory;
 import androidx.camera.core.Preview;
+import androidx.camera.core.SurfaceOrientedMeteringPointFactory;
 import androidx.camera.core.UseCaseGroup;
 import androidx.camera.lifecycle.ProcessCameraProvider;
 import androidx.camera.view.PreviewView;
@@ -14,10 +21,13 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Environment;
+import android.view.MotionEvent;
+import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
@@ -47,6 +57,8 @@ public class MainActivity extends AppCompatActivity {
 
     private FlashOverlay flashOverlay;
 
+    private Camera frontCamera, backCamera;
+
     private boolean backFrontSwapped = false;
 
     private final String IMAGE_DIR = Paths.get(
@@ -71,10 +83,31 @@ public class MainActivity extends AppCompatActivity {
         // Initialize main (larger) preview view to preview front camera
         mainPreviewView = findViewById(R.id.mainPreviewView);
 
+        // View for flash effect
+        flashOverlay = new FlashOverlay(findViewById(R.id.flashOverlay));
+
         btnCapture = findViewById(R.id.btnCapture);
         btnCapture.setOnClickListener(v -> capture());
 
-        flashOverlay = new FlashOverlay(findViewById(R.id.flashOverlay));
+        mainPreviewView.setOnTouchListener((v, event) -> {
+            v.performClick();
+            switch(event.getAction()) {
+                case MotionEvent.ACTION_DOWN:
+                    return true;
+                case MotionEvent.ACTION_UP:
+                    MeteringPointFactory factory = new DisplayOrientedMeteringPointFactory(
+                            getDisplay(), frontCamera.getCameraInfo(),
+                            (float) mainPreviewView.getWidth(), (float) mainPreviewView.getHeight()
+                    );
+                    MeteringPoint autoFocusPoint = factory.createPoint(event.getX(), event.getY());
+                    frontCamera.getCameraControl().startFocusAndMetering(
+                        new FocusMeteringAction.Builder(autoFocusPoint, FocusMeteringAction.FLAG_AF)
+                                .disableAutoCancel()
+                                .build()
+                    );
+            }
+            return true;
+        });
 
         if (allPermissionsGranted()) {
             startCamera();
@@ -87,6 +120,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    @SuppressLint("RestrictedApi")
     private void startCamera() {
         ListenableFuture<ProcessCameraProvider> cameraProviderFuture = ProcessCameraProvider.getInstance(this);
 
@@ -152,7 +186,15 @@ public class MainActivity extends AppCompatActivity {
                 List<ConcurrentCamera.SingleCameraConfig> configs = new ArrayList<>();
                 configs.add(frontCameraConfig);
                 configs.add(backCameraConfig);
-                cameraProvider.bindToLifecycle(configs);
+                ConcurrentCamera concurrentCamera = cameraProvider.bindToLifecycle(configs);
+
+                for(Camera camera : concurrentCamera.getCameras()) {
+                    CameraSelector cameraSelector = camera.getCameraInfo().getCameraSelector();
+                    if(cameraSelector.getLensFacing() == CameraSelector.LENS_FACING_FRONT)
+                        frontCamera = camera;
+                    else
+                        backCamera = camera;
+                }
 
             } catch (ExecutionException | InterruptedException e) {
                 e.printStackTrace();

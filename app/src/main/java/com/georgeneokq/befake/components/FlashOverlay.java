@@ -1,4 +1,4 @@
-package com.georgeneokq.befake;
+package com.georgeneokq.befake.components;
 
 import android.view.View;
 import android.view.animation.AlphaAnimation;

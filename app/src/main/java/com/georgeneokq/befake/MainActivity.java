@@ -14,12 +14,15 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import android.Manifest;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Environment;
+import android.util.Log;
 import android.widget.Button;
 import android.widget.Toast;
 
+import com.georgeneokq.befake.components.FlashOverlay;
 import com.google.common.util.concurrent.ListenableFuture;
 
 import java.io.File;
@@ -29,7 +32,6 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executor;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -152,16 +154,43 @@ public class MainActivity extends AppCompatActivity {
         backFrontSwapped = !backFrontSwapped;
     }
 
+    // To keep track of when both captures are complete
+    int imageCount = 0;
+
+    private synchronized void incrementImageCount() {
+        imageCount++;
+    }
+
+    private void goToPreview(String frontFilePath, String backFilePath) {
+        Intent intent = new Intent(this, CapturePreviewActivity.class);
+        intent.putExtra("frontFilePath", frontFilePath);
+        intent.putExtra("backFilePath", backFilePath);
+        startActivity(intent);
+    }
+
     private void capture() {
         ensureImageDirExists();
 
+        // When image count hits 2, that means both cameras have completed capture operation
+        imageCount = 0;
+
+        String frontFilePath = Paths.get(IMAGE_DIR, "tmp", String.format("%d_front.png", System.currentTimeMillis())).toString();
         ImageCapture.OutputFileOptions frontOutputFile = new ImageCapture.OutputFileOptions.Builder(
-                new File(IMAGE_DIR, String.format("%d_front.png", System.currentTimeMillis()))
+                new File(frontFilePath)
         ).build();
+
+        String backFilePath = Paths.get(IMAGE_DIR, "tmp", String.format("%d_back.png", System.currentTimeMillis())).toString();
+        ImageCapture.OutputFileOptions backOutputFile = new ImageCapture.OutputFileOptions.Builder(
+                new File(backFilePath)
+        ).build();
+
         frontImageCapture.takePicture(frontOutputFile, ContextCompat.getMainExecutor(this), new ImageCapture.OnImageSavedCallback() {
             @Override
             public void onImageSaved(@NonNull ImageCapture.OutputFileResults outputFileResults) {
-                Toast.makeText(MainActivity.this, "Image saved!", Toast.LENGTH_SHORT).show();
+                incrementImageCount();
+                if(imageCount == 2) {
+                    goToPreview(frontFilePath, backFilePath);
+                }
             }
 
             @Override
@@ -170,19 +199,17 @@ public class MainActivity extends AppCompatActivity {
                 exception.printStackTrace();
             }
         });
-
-        ImageCapture.OutputFileOptions backOutputFile = new ImageCapture.OutputFileOptions.Builder(
-                new File(IMAGE_DIR, String.format("%d_back.png", System.currentTimeMillis()))
-        ).build();
         backImageCapture.takePicture(backOutputFile, ContextCompat.getMainExecutor(this), new ImageCapture.OnImageSavedCallback() {
             @Override
             public void onImageSaved(@NonNull ImageCapture.OutputFileResults outputFileResults) {
-                Toast.makeText(MainActivity.this, "Image saved!", Toast.LENGTH_SHORT).show();
+                incrementImageCount();
+                if(imageCount == 2) {
+                    goToPreview(frontFilePath, backFilePath);
+                }
             }
 
             @Override
             public void onError(@NonNull ImageCaptureException exception) {
-
                 Toast.makeText(MainActivity.this, "Image error!", Toast.LENGTH_SHORT).show();
                 exception.printStackTrace();
             }
@@ -193,7 +220,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void ensureImageDirExists() {
         try {
-            Files.createDirectory(Paths.get(IMAGE_DIR));
+            Files.createDirectory(Paths.get(IMAGE_DIR, "tmp"));
         } catch (IOException e) {
             // Shouldn't happen
         }

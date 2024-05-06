@@ -8,6 +8,8 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
+import android.graphics.Paint;
+import android.graphics.Typeface;
 import android.media.ExifInterface;
 import android.media.MediaScannerConnection;
 import android.os.Bundle;
@@ -28,13 +30,14 @@ public class CapturePreviewActivity extends AppCompatActivity {
     private ImageView previewImageView;
     private String frontFilePath, backFilePath;
 
-    private ImageButton btnDownload, btnReverse;
+    private ImageButton btnDownload, btnReverse, btnWatermark;
 
     private final String IMAGE_DIR = Paths.get(
             Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM).getAbsolutePath(),
             "BeFake").toString();
 
     private boolean reverse;
+    private boolean isWatermarked;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,14 +47,26 @@ public class CapturePreviewActivity extends AppCompatActivity {
         previewImageView = findViewById(R.id.previewImageView);
         btnDownload = findViewById(R.id.btnDownload);
         btnReverse = findViewById(R.id.btnReverse);
+        btnWatermark = findViewById(R.id.btnWatermark);
 
-        btnReverse.setOnClickListener(v -> reverseImages());
+        btnReverse.setOnClickListener(v -> toggleMainPreview());
+        btnWatermark.setOnClickListener(v -> toggleWatermark());
 
+        toggleWatermark();
+    }
+
+    private void toggleMainPreview() {
+        reverse = !reverse;
         setPreview();
     }
 
-    private void reverseImages() {
-        reverse = !reverse;
+    private void toggleWatermark() {
+        isWatermarked = !isWatermarked;
+        if(isWatermarked) {
+            btnWatermark.setImageDrawable(getDrawable(R.drawable.text_active));
+        } else {
+            btnWatermark.setImageDrawable(getDrawable(R.drawable.text));
+        }
         setPreview();
     }
 
@@ -93,6 +108,19 @@ public class CapturePreviewActivity extends AppCompatActivity {
         subCameraBitmap = Bitmap.createScaledBitmap(subCameraBitmap, backWidth, backHeight, true);
         subCameraBitmap = addBorder(subCameraBitmap, 2);
         canvas.drawBitmap(subCameraBitmap, 30, 30, null);
+
+        if(isWatermarked) {
+            Paint textPaint = new Paint();
+            textPaint.setTextAlign(Paint.Align.CENTER);
+            textPaint.setTextSize(58);
+            textPaint.setColor(Color.WHITE);
+            textPaint.setAlpha(200);
+            textPaint.setTypeface(Typeface.create(Typeface.SANS_SERIF, Typeface.BOLD));
+            textPaint.setLetterSpacing(0.02f);
+            int x = canvas.getWidth() / 2;
+            int y = (int) ((canvas.getHeight() - 50) - ((textPaint.descent() + textPaint.ascent()) / 2));
+            canvas.drawText("BeFake.", x, y, textPaint);
+        }
 
         previewImageView.setImageBitmap(canvasBitmap);
 

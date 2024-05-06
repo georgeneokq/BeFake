@@ -209,7 +209,6 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onError(@NonNull ImageCaptureException exception) {
-                Toast.makeText(MainActivity.this, "Image error!", Toast.LENGTH_SHORT).show();
                 exception.printStackTrace();
             }
         });
@@ -224,7 +223,6 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onError(@NonNull ImageCaptureException exception) {
-                Toast.makeText(MainActivity.this, "Image error!", Toast.LENGTH_SHORT).show();
                 exception.printStackTrace();
             }
         });

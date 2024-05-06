@@ -12,7 +12,6 @@ import android.media.ExifInterface;
 import android.media.MediaScannerConnection;
 import android.os.Bundle;
 import android.os.Environment;
-import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.Toast;
@@ -29,11 +28,13 @@ public class CapturePreviewActivity extends AppCompatActivity {
     private ImageView previewImageView;
     private String frontFilePath, backFilePath;
 
-    private ImageButton btnDownload;
+    private ImageButton btnDownload, btnReverse;
 
     private final String IMAGE_DIR = Paths.get(
             Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM).getAbsolutePath(),
             "BeFake").toString();
+
+    private boolean reverse;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,43 +43,67 @@ public class CapturePreviewActivity extends AppCompatActivity {
 
         previewImageView = findViewById(R.id.previewImageView);
         btnDownload = findViewById(R.id.btnDownload);
+        btnReverse = findViewById(R.id.btnReverse);
 
+        btnReverse.setOnClickListener(v -> reverseImages());
+
+        setPreview();
+    }
+
+    private void reverseImages() {
+        reverse = !reverse;
+        setPreview();
+    }
+
+    private void setPreview() {
         Intent intent = getIntent();
         frontFilePath = intent.getStringExtra("frontFilePath");
         backFilePath = intent.getStringExtra("backFilePath");
 
+        String mainBitmapFilePath, subBitmapFilePath;
+
+        if(!reverse) {
+            mainBitmapFilePath = frontFilePath;
+            subBitmapFilePath = backFilePath;
+        } else {
+            mainBitmapFilePath = backFilePath;
+            subBitmapFilePath = frontFilePath;
+        }
+
         // Load front bitmap, account for rotation specified in EXIF
-        Bitmap frontCameraBitmap = BitmapFactory.decodeFile(frontFilePath);
-        frontCameraBitmap = rotateBitmap(frontCameraBitmap, frontFilePath);
+        Bitmap mainCameraBitmap = BitmapFactory.decodeFile(mainBitmapFilePath);
+        mainCameraBitmap = rotateBitmap(mainCameraBitmap, mainBitmapFilePath);
 
         // The bitmap that the canvas will draw onto.
-        Bitmap canvasBitmap = Bitmap.createBitmap(frontCameraBitmap.getWidth(), frontCameraBitmap.getHeight(), Bitmap.Config.RGB_565);
+        Bitmap canvasBitmap = Bitmap.createBitmap(mainCameraBitmap.getWidth(), mainCameraBitmap.getHeight(), Bitmap.Config.RGB_565);
 
         // Load back bitmap, account for rotation specified in EXIF
-        Bitmap backCameraBitmap = BitmapFactory.decodeFile(backFilePath);
-        backCameraBitmap = rotateBitmap(backCameraBitmap, backFilePath);
+        Bitmap subCameraBitmap = BitmapFactory.decodeFile(subBitmapFilePath);
+        subCameraBitmap = rotateBitmap(subCameraBitmap, subBitmapFilePath);
 
         // Create canvas, draw front as main image, back as sub image
         Canvas canvas = new Canvas(canvasBitmap);
-        canvas.drawBitmap(frontCameraBitmap, 0, 0, null);
+        canvas.drawBitmap(mainCameraBitmap, 0, 0, null);
 
         // Scale down back camera bitmap. Set height to 1/4 of main image.
         // Scale width according to original aspect ratio.
-        int backHeight = frontCameraBitmap.getHeight() / 3;
-        float ratio = (float) backHeight / backCameraBitmap.getHeight();
-        int backWidth = Math.round(backCameraBitmap.getWidth() * ratio);
-        backCameraBitmap = Bitmap.createScaledBitmap(backCameraBitmap, backWidth, backHeight, true);
-        backCameraBitmap = addBorder(backCameraBitmap, 2);
-        canvas.drawBitmap(backCameraBitmap, 30, 30, null);
+        int backHeight = mainCameraBitmap.getHeight() / 3;
+        float ratio = (float) backHeight / subCameraBitmap.getHeight();
+        int backWidth = Math.round(subCameraBitmap.getWidth() * ratio);
+        subCameraBitmap = Bitmap.createScaledBitmap(subCameraBitmap, backWidth, backHeight, true);
+        subCameraBitmap = addBorder(subCameraBitmap, 2);
+        canvas.drawBitmap(subCameraBitmap, 30, 30, null);
 
         previewImageView.setImageBitmap(canvasBitmap);
+
+        mainCameraBitmap.recycle();
+        subCameraBitmap.recycle();
 
         btnDownload.setOnClickListener(v -> {
             Util.vibrateTapLight(this);
             String filePath = Paths.get(IMAGE_DIR, String.format("BeFake_%d.jpg", System.currentTimeMillis())).toString();
             saveBitmap(canvasBitmap, filePath);
             Toast.makeText(this, "Saved!", Toast.LENGTH_SHORT).show();
-            finish();
         });
     }
 

@@ -32,7 +32,7 @@ public class CapturePreviewActivity extends AppCompatActivity {
     private ImageButton btnDownload;
 
     private final String IMAGE_DIR = Paths.get(
-            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).getAbsolutePath(),
+            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM).getAbsolutePath(),
             "BeFake").toString();
 
     @Override

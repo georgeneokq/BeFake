@@ -50,7 +50,7 @@ public class MainActivity extends AppCompatActivity {
     private boolean backFrontSwapped = false;
 
     private final String IMAGE_DIR = Paths.get(
-            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).getAbsolutePath(),
+            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM).getAbsolutePath(),
             "BeFake").toString();
 
     private String TMP_DIR;

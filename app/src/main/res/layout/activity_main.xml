@@ -4,13 +4,13 @@
 
     <!-- Main SurfaceView for displaying back camera preview (by default) -->
     <androidx.camera.view.PreviewView
-        android:id="@+id/frontPreviewView"
+        android:id="@+id/mainPreviewView"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
     <!-- Sub SurfaceView for displaying front camera preview (by default). -->
     <androidx.camera.view.PreviewView
-        android:id="@+id/backPreviewView"
+        android:id="@+id/subPreviewView"
         android:layout_width="150dp"
         android:layout_height="200dp"
         android:layout_alignParentStart="true"

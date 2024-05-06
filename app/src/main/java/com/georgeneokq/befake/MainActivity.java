@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.camera.core.CameraSelector;
 import androidx.camera.core.ConcurrentCamera;
 import androidx.camera.core.ImageCapture;
+import androidx.camera.core.ImageCaptureException;
 import androidx.camera.core.Preview;
 import androidx.camera.core.UseCaseGroup;
 import androidx.camera.lifecycle.ProcessCameraProvider;
@@ -15,29 +16,49 @@ import androidx.core.content.ContextCompat;
 import android.Manifest;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.view.SurfaceView;
+import android.os.Environment;
+import android.widget.Button;
 import android.widget.Toast;
 
 import com.google.common.util.concurrent.ListenableFuture;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executor;
 
 public class MainActivity extends AppCompatActivity {
 
     private static final int REQUEST_CAMERA_PERMISSION = 1;
 
-    private PreviewView backPreviewView;
-    private PreviewView frontPreviewView;
+    private PreviewView subPreviewView;
+    private PreviewView mainPreviewView;
+
+    private Button btnCapture;
+
+    private ImageCapture frontImageCapture, backImageCapture;
+
+    private boolean backFrontSwapped = false;
+
+    private final static String IMAGE_DIR = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES) + "/BeFake";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        backPreviewView = findViewById(R.id.backPreviewView);
-        frontPreviewView = findViewById(R.id.frontPreviewView);
+        // Initialize sub (smaller) preview view to preview back camera
+        subPreviewView = findViewById(R.id.subPreviewView);
+
+        // Initialize main (larger) preview view to preview front camera
+        mainPreviewView = findViewById(R.id.mainPreviewView);
+
+        btnCapture = findViewById(R.id.btnCapture);
+        btnCapture.setOnClickListener(v -> capture());
 
         if (allPermissionsGranted()) {
             startCamera();
@@ -57,20 +78,30 @@ public class MainActivity extends AppCompatActivity {
             try {
                 ProcessCameraProvider cameraProvider = cameraProviderFuture.get();
 
+                Preview.SurfaceProvider backSurfaceProvider, frontSurfaceProvider;
+
+                if(!backFrontSwapped) {
+                    frontSurfaceProvider = mainPreviewView.getSurfaceProvider();
+                    backSurfaceProvider = subPreviewView.getSurfaceProvider();
+                } else {
+                    frontSurfaceProvider = subPreviewView.getSurfaceProvider();
+                    backSurfaceProvider = mainPreviewView.getSurfaceProvider();
+                }
+
                 // Set up preview use case
                 Preview backPreview = new Preview.Builder().build();
-                backPreview.setSurfaceProvider(backPreviewView.getSurfaceProvider());
+                backPreview.setSurfaceProvider(backSurfaceProvider);
 
                 Preview frontPreview = new Preview.Builder().build();
-                frontPreview.setSurfaceProvider(frontPreviewView.getSurfaceProvider());
+                frontPreview.setSurfaceProvider(frontSurfaceProvider);
 
                 // Set up image capture use case
-                ImageCapture backImageCapture = new ImageCapture.Builder()
-                        .setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY)
+                backImageCapture = new ImageCapture.Builder()
+                        .setCaptureMode(ImageCapture.CAPTURE_MODE_MAXIMIZE_QUALITY)
                         .build();
 
-                ImageCapture frontImageCapture = new ImageCapture.Builder()
-                        .setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY)
+                frontImageCapture = new ImageCapture.Builder()
+                        .setCaptureMode(ImageCapture.CAPTURE_MODE_MAXIMIZE_QUALITY)
                         .build();
 
                 // Get front and back camera selectors
@@ -84,6 +115,7 @@ public class MainActivity extends AppCompatActivity {
 
                 cameraProvider.unbindAll();
 
+                // Set up camera configs, add preview and image capture use cases
                 ConcurrentCamera.SingleCameraConfig frontCameraConfig = new ConcurrentCamera.SingleCameraConfig(
                         frontCameraSelector,
                         new UseCaseGroup.Builder()
@@ -100,6 +132,7 @@ public class MainActivity extends AppCompatActivity {
                                 .build(),
                         this);
 
+                // Bind configs to lifecycle
                 List<ConcurrentCamera.SingleCameraConfig> configs = new ArrayList<>();
                 configs.add(frontCameraConfig);
                 configs.add(backCameraConfig);
@@ -109,6 +142,55 @@ public class MainActivity extends AppCompatActivity {
                 e.printStackTrace();
             }
         }, ContextCompat.getMainExecutor(this));
+    }
+
+    private void swapCameraPreview() {
+        backFrontSwapped = !backFrontSwapped;
+    }
+
+    private void capture() {
+        ensureImageDirExists();
+
+        ImageCapture.OutputFileOptions frontOutputFile = new ImageCapture.OutputFileOptions.Builder(
+                new File(IMAGE_DIR, String.format("%d_front.png", System.currentTimeMillis()))
+        ).build();
+        frontImageCapture.takePicture(frontOutputFile, ContextCompat.getMainExecutor(this), new ImageCapture.OnImageSavedCallback() {
+            @Override
+            public void onImageSaved(@NonNull ImageCapture.OutputFileResults outputFileResults) {
+                Toast.makeText(MainActivity.this, "Image saved!", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onError(@NonNull ImageCaptureException exception) {
+                Toast.makeText(MainActivity.this, "Image error!", Toast.LENGTH_SHORT).show();
+                exception.printStackTrace();
+            }
+        });
+
+        ImageCapture.OutputFileOptions backOutputFile = new ImageCapture.OutputFileOptions.Builder(
+                new File(IMAGE_DIR, String.format("%d_back.png", System.currentTimeMillis()))
+        ).build();
+        backImageCapture.takePicture(backOutputFile, ContextCompat.getMainExecutor(this), new ImageCapture.OnImageSavedCallback() {
+            @Override
+            public void onImageSaved(@NonNull ImageCapture.OutputFileResults outputFileResults) {
+                Toast.makeText(MainActivity.this, "Image saved!", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onError(@NonNull ImageCaptureException exception) {
+
+                Toast.makeText(MainActivity.this, "Image error!", Toast.LENGTH_SHORT).show();
+                exception.printStackTrace();
+            }
+        });
+    }
+
+    private void ensureImageDirExists() {
+        try {
+            Files.createDirectory(Paths.get(IMAGE_DIR));
+        } catch (IOException e) {
+            // Shouldn't happen
+        }
     }
 
     private boolean allPermissionsGranted() {

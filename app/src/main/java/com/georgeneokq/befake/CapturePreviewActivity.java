@@ -1,6 +1,7 @@
 package com.georgeneokq.befake;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.camera.core.impl.Config;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -9,6 +10,9 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffXfermode;
+import android.graphics.RectF;
 import android.graphics.Typeface;
 import android.media.ExifInterface;
 import android.media.MediaScannerConnection;
@@ -90,7 +94,7 @@ public class CapturePreviewActivity extends AppCompatActivity {
         mainCameraBitmap = rotateBitmap(mainCameraBitmap, mainBitmapFilePath);
 
         // The bitmap that the canvas will draw onto.
-        Bitmap canvasBitmap = Bitmap.createBitmap(mainCameraBitmap.getWidth(), mainCameraBitmap.getHeight(), Bitmap.Config.RGB_565);
+        Bitmap canvasBitmap = Bitmap.createBitmap(mainCameraBitmap.getWidth(), mainCameraBitmap.getHeight(), Bitmap.Config.ARGB_8888);
 
         // Load back bitmap, account for rotation specified in EXIF
         Bitmap subCameraBitmap = BitmapFactory.decodeFile(subBitmapFilePath);
@@ -102,12 +106,16 @@ public class CapturePreviewActivity extends AppCompatActivity {
 
         // Scale down back camera bitmap. Set height to 1/4 of main image.
         // Scale width according to original aspect ratio.
-        int backHeight = mainCameraBitmap.getHeight() / 3;
-        float ratio = (float) backHeight / subCameraBitmap.getHeight();
-        int backWidth = Math.round(subCameraBitmap.getWidth() * ratio);
-        subCameraBitmap = Bitmap.createScaledBitmap(subCameraBitmap, backWidth, backHeight, true);
-        subCameraBitmap = addBorder(subCameraBitmap, 2);
-        canvas.drawBitmap(subCameraBitmap, 30, 30, null);
+        float subBitmapHeight = mainCameraBitmap.getHeight() / 3.2f;
+        float ratio = subBitmapHeight / subCameraBitmap.getHeight();
+        float subBitmapWidth = subCameraBitmap.getWidth() * ratio;
+        subCameraBitmap = Bitmap.createScaledBitmap(subCameraBitmap,
+                Math.round(subBitmapWidth), Math.round(subBitmapHeight), true);
+
+        // Round the corners of the sub camera bitmap
+        subCameraBitmap = Util.getRoundedCornerBitmap(subCameraBitmap, 100, 8, Color.BLACK);
+
+        canvas.drawBitmap(subCameraBitmap, 45, 45, null);
 
         if(isWatermarked) {
             Paint textPaint = new Paint();
@@ -177,7 +185,7 @@ public class CapturePreviewActivity extends AppCompatActivity {
     private Bitmap addBorder(Bitmap bmp, int borderSize) {
         Bitmap bmpWithBorder = Bitmap.createBitmap(bmp.getWidth() + borderSize * 2, bmp.getHeight() + borderSize * 2, bmp.getConfig());
         Canvas canvas = new Canvas(bmpWithBorder);
-        canvas.drawColor(Color.BLACK);
+        canvas.drawColor(getResources().getColor(R.color.black, getTheme()));
         canvas.drawBitmap(bmp, borderSize, borderSize, null);
         return bmpWithBorder;
     }

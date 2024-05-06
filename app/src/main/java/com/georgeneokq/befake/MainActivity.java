@@ -42,6 +42,8 @@ public class MainActivity extends AppCompatActivity {
 
     private ImageCapture frontImageCapture, backImageCapture;
 
+    private FlashOverlay flashOverlay;
+
     private boolean backFrontSwapped = false;
 
     private final static String IMAGE_DIR = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES) + "/BeFake";
@@ -59,6 +61,8 @@ public class MainActivity extends AppCompatActivity {
 
         btnCapture = findViewById(R.id.btnCapture);
         btnCapture.setOnClickListener(v -> capture());
+
+        flashOverlay = new FlashOverlay(findViewById(R.id.flashOverlay));
 
         if (allPermissionsGranted()) {
             startCamera();
@@ -183,6 +187,8 @@ public class MainActivity extends AppCompatActivity {
                 exception.printStackTrace();
             }
         });
+
+        flashOverlay.flash();
     }
 
     private void ensureImageDirExists() {

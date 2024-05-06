@@ -28,4 +28,12 @@
         android:background="@drawable/capture_button"
         android:src="@drawable/capture_button" />
 
+    <!--  For flash effect  -->
+    <FrameLayout
+        android:id="@+id/flashOverlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#F2FFFFFF"
+        android:visibility="gone" />
+
 </RelativeLayout>

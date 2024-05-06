@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.media.ExifInterface;
@@ -60,6 +61,7 @@ public class CapturePreviewActivity extends AppCompatActivity {
         float ratio = (float) backHeight / backCameraBitmap.getHeight();
         int backWidth = Math.round(backCameraBitmap.getWidth() * ratio);
         backCameraBitmap = Bitmap.createScaledBitmap(backCameraBitmap, backWidth, backHeight, true);
+        backCameraBitmap = addBorder(backCameraBitmap, 2);
         canvas.drawBitmap(backCameraBitmap, 30, 30, null);
 
         previewImageView.setImageBitmap(canvasBitmap);
@@ -106,5 +108,13 @@ public class CapturePreviewActivity extends AppCompatActivity {
             e.printStackTrace();
             return null;
         }
+    }
+
+    private Bitmap addBorder(Bitmap bmp, int borderSize) {
+        Bitmap bmpWithBorder = Bitmap.createBitmap(bmp.getWidth() + borderSize * 2, bmp.getHeight() + borderSize * 2, bmp.getConfig());
+        Canvas canvas = new Canvas(bmpWithBorder);
+        canvas.drawColor(Color.BLACK);
+        canvas.drawBitmap(bmp, borderSize, borderSize, null);
+        return bmpWithBorder;
     }
 }

@@ -109,6 +109,26 @@ public class MainActivity extends AppCompatActivity {
             return true;
         });
 
+        subPreviewView.setOnTouchListener((v, event) -> {
+            v.performClick();
+            switch(event.getAction()) {
+                case MotionEvent.ACTION_DOWN:
+                    return true;
+                case MotionEvent.ACTION_UP:
+                    MeteringPointFactory factory = new DisplayOrientedMeteringPointFactory(
+                            getDisplay(), backCamera.getCameraInfo(),
+                            (float) subPreviewView.getWidth(), (float) subPreviewView.getHeight()
+                    );
+                    MeteringPoint autoFocusPoint = factory.createPoint(event.getX(), event.getY());
+                    backCamera.getCameraControl().startFocusAndMetering(
+                            new FocusMeteringAction.Builder(autoFocusPoint, FocusMeteringAction.FLAG_AF)
+                                    .disableAutoCancel()
+                                    .build()
+                    );
+            }
+            return true;
+        });
+
         if (allPermissionsGranted()) {
             startCamera();
         } else {

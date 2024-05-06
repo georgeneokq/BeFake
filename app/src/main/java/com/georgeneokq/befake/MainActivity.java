@@ -14,17 +14,15 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import android.Manifest;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Environment;
-import android.os.VibrationEffect;
-import android.os.Vibrator;
 import android.widget.Button;
 import android.widget.Toast;
 
 import com.georgeneokq.befake.components.FlashOverlay;
+import com.georgeneokq.befake.util.Util;
 import com.google.common.util.concurrent.ListenableFuture;
 
 import java.io.File;
@@ -39,8 +37,6 @@ import java.util.concurrent.ExecutionException;
 public class MainActivity extends AppCompatActivity {
 
     private static final int REQUEST_CAMERA_PERMISSION = 1;
-
-    private Vibrator vibrator;
 
     private PreviewView subPreviewView;
     private PreviewView mainPreviewView;
@@ -65,8 +61,6 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         TMP_DIR = Paths.get(this.getCacheDir().getAbsolutePath(), "BeFake").toString();
-
-        vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
 
         // Clear all temp files upon starting this activity.
         deleteTempFiles();
@@ -187,7 +181,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void capture() {
-        vibrator.vibrate(VibrationEffect.createPredefined(VibrationEffect.EFFECT_HEAVY_CLICK));
+        Util.vibrateTap(this);
 
         ensureDirectoriesExist();
 

@@ -8,12 +8,16 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
-import android.graphics.Rect;
 import android.media.ExifInterface;
 import android.media.MediaScannerConnection;
 import android.os.Bundle;
 import android.os.Environment;
+import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.Toast;
+
+import com.georgeneokq.befake.util.Util;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -25,6 +29,8 @@ public class CapturePreviewActivity extends AppCompatActivity {
     private ImageView previewImageView;
     private String frontFilePath, backFilePath;
 
+    private ImageButton btnDownload;
+
     private final String IMAGE_DIR = Paths.get(
             Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).getAbsolutePath(),
             "BeFake").toString();
@@ -35,6 +41,7 @@ public class CapturePreviewActivity extends AppCompatActivity {
         setContentView(R.layout.activity_capture_preview);
 
         previewImageView = findViewById(R.id.previewImageView);
+        btnDownload = findViewById(R.id.btnDownload);
 
         Intent intent = getIntent();
         frontFilePath = intent.getStringExtra("frontFilePath");
@@ -66,12 +73,16 @@ public class CapturePreviewActivity extends AppCompatActivity {
 
         previewImageView.setImageBitmap(canvasBitmap);
 
-        // TODO: Create buttons to save image / go back to camera
-        String filePath = Paths.get(IMAGE_DIR, String.format("BeFake_%d.jpg", System.currentTimeMillis())).toString();
-        saveBitmap(canvasBitmap, filePath);
+        btnDownload.setOnClickListener(v -> {
+            Util.vibrateTapLight(this);
+            String filePath = Paths.get(IMAGE_DIR, String.format("BeFake_%d.jpg", System.currentTimeMillis())).toString();
+            saveBitmap(canvasBitmap, filePath);
+            Toast.makeText(this, "Saved!", Toast.LENGTH_SHORT).show();
+            finish();
+        });
     }
 
-    private void saveBitmap(Bitmap bitmap, String filePath){
+    private void saveBitmap(Bitmap bitmap, String filePath) {
         File file = new File(filePath);
 
         try {

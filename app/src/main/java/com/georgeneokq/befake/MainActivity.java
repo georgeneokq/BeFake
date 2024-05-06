@@ -187,7 +187,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void capture() {
-        vibrator.vibrate(VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK));
+        vibrator.vibrate(VibrationEffect.createPredefined(VibrationEffect.EFFECT_HEAVY_CLICK));
 
         ensureDirectoriesExist();
 

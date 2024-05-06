@@ -18,7 +18,6 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Environment;
-import android.util.Log;
 import android.widget.Button;
 import android.widget.Toast;
 
@@ -28,6 +27,7 @@ import com.google.common.util.concurrent.ListenableFuture;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
@@ -48,12 +48,21 @@ public class MainActivity extends AppCompatActivity {
 
     private boolean backFrontSwapped = false;
 
-    private final static String IMAGE_DIR = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES) + "/BeFake";
+    private final String IMAGE_DIR = Paths.get(
+            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).getAbsolutePath(),
+            "BeFake").toString();
+
+    private String TMP_DIR;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        TMP_DIR = Paths.get(this.getCacheDir().getAbsolutePath(), "BeFake").toString();
+
+        // Clear all temp files upon starting this activity.
+        deleteTempFiles();
 
         // Initialize sub (smaller) preview view to preview back camera
         subPreviewView = findViewById(R.id.subPreviewView);
@@ -169,17 +178,17 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void capture() {
-        ensureImageDirExists();
+        ensureDirectoriesExist();
 
         // When image count hits 2, that means both cameras have completed capture operation
         imageCount = 0;
 
-        String frontFilePath = Paths.get(IMAGE_DIR, "tmp", String.format("%d_front.png", System.currentTimeMillis())).toString();
+        String frontFilePath = Paths.get(TMP_DIR, String.format("%d_front.png", System.currentTimeMillis())).toString();
         ImageCapture.OutputFileOptions frontOutputFile = new ImageCapture.OutputFileOptions.Builder(
                 new File(frontFilePath)
         ).build();
 
-        String backFilePath = Paths.get(IMAGE_DIR, "tmp", String.format("%d_back.png", System.currentTimeMillis())).toString();
+        String backFilePath = Paths.get(TMP_DIR, String.format("%d_back.png", System.currentTimeMillis())).toString();
         ImageCapture.OutputFileOptions backOutputFile = new ImageCapture.OutputFileOptions.Builder(
                 new File(backFilePath)
         ).build();
@@ -218,11 +227,27 @@ public class MainActivity extends AppCompatActivity {
         flashOverlay.flash();
     }
 
-    private void ensureImageDirExists() {
-        try {
-            Files.createDirectory(Paths.get(IMAGE_DIR, "tmp"));
-        } catch (IOException e) {
-            // Shouldn't happen
+    private void ensureDirectoriesExist() {
+        Path[] directories = new Path[] {
+                Paths.get(IMAGE_DIR),
+                Paths.get(TMP_DIR)
+        };
+
+        for(Path dir : directories) {
+            try {
+                Files.createDirectory(dir);
+            } catch (IOException e) {}
+        }
+    }
+
+    private void deleteTempFiles() {
+        File tmpDir = new File(TMP_DIR);
+        if(!tmpDir.exists())
+            return;
+
+        File[] files = tmpDir.listFiles();
+        for(File file : files) {
+            file.delete();
         }
     }
 

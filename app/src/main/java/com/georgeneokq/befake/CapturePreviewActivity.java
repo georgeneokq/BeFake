@@ -24,7 +24,9 @@ public class CapturePreviewActivity extends AppCompatActivity {
     private ImageView previewImageView;
     private String frontFilePath, backFilePath;
 
-    private final static String IMAGE_DIR = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES) + "/BeFake";
+    private final String IMAGE_DIR = Paths.get(
+            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).getAbsolutePath(),
+            "BeFake").toString();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

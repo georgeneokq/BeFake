@@ -3,7 +3,6 @@ package com.georgeneokq.befake;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.camera.core.Camera;
-import androidx.camera.core.CameraInfoUnavailableException;
 import androidx.camera.core.CameraSelector;
 import androidx.camera.core.ConcurrentCamera;
 import androidx.camera.core.DisplayOrientedMeteringPointFactory;
@@ -13,7 +12,6 @@ import androidx.camera.core.ImageCaptureException;
 import androidx.camera.core.MeteringPoint;
 import androidx.camera.core.MeteringPointFactory;
 import androidx.camera.core.Preview;
-import androidx.camera.core.SurfaceOrientedMeteringPointFactory;
 import androidx.camera.core.UseCaseGroup;
 import androidx.camera.lifecycle.ProcessCameraProvider;
 import androidx.camera.view.PreviewView;
@@ -26,9 +24,10 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Environment;
+import android.provider.Settings;
 import android.view.MotionEvent;
-import android.view.View;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.Toast;
 
 import com.georgeneokq.befake.components.FlashOverlay;
@@ -52,6 +51,7 @@ public class MainActivity extends AppCompatActivity {
     private PreviewView mainPreviewView;
 
     private Button btnCapture;
+    private ImageButton btnSettings;
 
     private ImageCapture frontImageCapture, backImageCapture;
 
@@ -85,6 +85,12 @@ public class MainActivity extends AppCompatActivity {
 
         // View for flash effect
         flashOverlay = new FlashOverlay(findViewById(R.id.flashOverlay));
+
+        btnSettings = findViewById(R.id.btnSettings);
+        btnSettings.setOnClickListener(v -> {
+            Intent intent = new Intent(this, SettingsActivity.class);
+            startActivity(intent);
+        });
 
         btnCapture = findViewById(R.id.btnCapture);
         btnCapture.setOnClickListener(v -> capture());

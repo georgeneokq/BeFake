@@ -9,6 +9,7 @@ import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.media.ExifInterface;
+import android.media.MediaScannerConnection;
 import android.os.Bundle;
 import android.os.Environment;
 import android.widget.ImageView;
@@ -53,11 +54,11 @@ public class CapturePreviewActivity extends AppCompatActivity {
 
         // Scale down back camera bitmap. Set height to 1/4 of main image.
         // Scale width according to original aspect ratio.
-        int backHeight = frontCameraBitmap.getHeight() / 4;
+        int backHeight = frontCameraBitmap.getHeight() / 3;
         float ratio = (float) backHeight / backCameraBitmap.getHeight();
         int backWidth = Math.round(backCameraBitmap.getWidth() * ratio);
         backCameraBitmap = Bitmap.createScaledBitmap(backCameraBitmap, backWidth, backHeight, true);
-        canvas.drawBitmap(backCameraBitmap, 15, 15, null);
+        canvas.drawBitmap(backCameraBitmap, 30, 30, null);
 
         previewImageView.setImageBitmap(canvasBitmap);
 
@@ -71,9 +72,14 @@ public class CapturePreviewActivity extends AppCompatActivity {
 
         try {
             bitmap.compress(Bitmap.CompressFormat.JPEG, 100, new FileOutputStream(file));
+
+            // Trigger MediaScanner to inform system of new media file
+            String[] toScan = new String[] { file.getAbsolutePath() };
+            MediaScannerConnection.scanFile(this, toScan, null, null);
         } catch (Exception e) {
             e.printStackTrace();
         }
+
     }
     private Bitmap rotateBitmap(Bitmap bitmap, String filePath) {
         try {

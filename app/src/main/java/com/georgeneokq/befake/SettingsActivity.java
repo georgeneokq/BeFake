@@ -14,7 +14,7 @@ public class SettingsActivity extends AppCompatActivity {
     private SharedPreferences prefs;
 
     private Button btnResetSettings, btnConfirm;
-    private EditText editWatermarkText, editWatermarkColor, editWatermarkAlpha, editBorderColor, editBorderAlpha;
+    private EditText editWatermarkText, editWatermarkColor, editWatermarkAlpha, editWatermarkSize, editBorderColor, editBorderAlpha;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,6 +26,7 @@ public class SettingsActivity extends AppCompatActivity {
         editWatermarkText = findViewById(R.id.editWatermarkText);
         editWatermarkColor = findViewById(R.id.editWatermarkColor);
         editWatermarkAlpha = findViewById(R.id.editWatermarkAlpha);
+        editWatermarkSize = findViewById(R.id.editWatermarkSize);
         editBorderColor = findViewById(R.id.editBorderColor);
         editBorderAlpha = findViewById(R.id.editBorderAlpha);
         btnResetSettings = findViewById(R.id.btnResetSettings);
@@ -41,12 +42,14 @@ public class SettingsActivity extends AppCompatActivity {
         String watermarkText = prefs.getString("watermarkText", "");
         String watermarkColor = prefs.getString("watermarkColor", "");
         int watermarkAlpha = prefs.getInt("watermarkAlpha", 100);
+        int watermarkSize = prefs.getInt("watermarkSize", 58);
         String borderColor = prefs.getString("borderColor", "");
         int borderAlpha = prefs.getInt("borderAlpha", 100);
 
         editWatermarkText.setText(watermarkText);
         editWatermarkColor.setText(watermarkColor);
         editWatermarkAlpha.setText(String.valueOf(watermarkAlpha));
+        editWatermarkSize.setText(String.valueOf(watermarkSize));
         editBorderColor.setText(borderColor);
         editBorderAlpha.setText(String.valueOf(borderAlpha));
     }
@@ -61,6 +64,7 @@ public class SettingsActivity extends AppCompatActivity {
         String watermarkText = editWatermarkText.getText().toString();
         String watermarkColor = editWatermarkColor.getText().toString();
         int watermarkAlpha = Integer.parseInt(editWatermarkAlpha.getText().toString());
+        int watermarkSize = Integer.parseInt(editWatermarkSize.getText().toString());
         String borderColor = editBorderColor.getText().toString();
         int borderAlpha = Integer.parseInt(editBorderAlpha.getText().toString());
 
@@ -69,6 +73,7 @@ public class SettingsActivity extends AppCompatActivity {
         editor.putString("watermarkText", watermarkText);
         editor.putString("watermarkColor", watermarkColor);
         editor.putInt("watermarkAlpha", watermarkAlpha);
+        editor.putInt("watermarkSize", watermarkSize);
         editor.putString("borderColor", borderColor);
         editor.putInt("borderAlpha", borderAlpha);
         editor.apply();

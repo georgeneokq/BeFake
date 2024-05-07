@@ -13,6 +13,7 @@ import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
+import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Typeface;
 import android.media.ExifInterface;
@@ -45,7 +46,7 @@ public class CapturePreviewActivity extends AppCompatActivity {
     private boolean isWatermarked;
 
     private String watermarkText, watermarkColor, borderColor;
-    private int watermarkAlpha, borderAlpha;
+    private int watermarkAlpha, watermarkSize, borderAlpha;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,6 +57,7 @@ public class CapturePreviewActivity extends AppCompatActivity {
         watermarkText = prefs.getString("watermarkText", "");
         watermarkColor = prefs.getString("watermarkColor", "");
         watermarkAlpha = prefs.getInt("watermarkAlpha", 100);
+        watermarkSize = prefs.getInt("watermarkSize", 58);
         borderColor = prefs.getString("borderColor", "");
         borderAlpha = prefs.getInt("borderAlpha", 100);
 
@@ -149,13 +151,16 @@ public class CapturePreviewActivity extends AppCompatActivity {
 
             Paint textPaint = new Paint();
             textPaint.setTextAlign(Paint.Align.CENTER);
-            textPaint.setTextSize(58);
+            textPaint.setTextSize(watermarkSize);
             textPaint.setColor(color);
             textPaint.setAlpha((int) (watermarkAlpha / 100.0f * 255));
             textPaint.setTypeface(Typeface.create(Typeface.SANS_SERIF, Typeface.BOLD));
             textPaint.setLetterSpacing(0.02f);
+
+            Rect bounds = new Rect();
+            textPaint.getTextBounds(watermarkText, 0, watermarkText.length(), bounds);
             int x = canvas.getWidth() / 2;
-            int y = (int) ((canvas.getHeight() - 50) - ((textPaint.descent() + textPaint.ascent()) / 2));
+            int y = canvas.getHeight() - (bounds.height() / 2);
             canvas.drawText(watermarkText, x, y, textPaint);
         }
 

@@ -20,8 +20,11 @@ import androidx.core.content.ContextCompat;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.media.AudioManager;
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Environment;
 import android.view.MotionEvent;
@@ -58,6 +61,9 @@ public class MainActivity extends AppCompatActivity {
 
     private Camera frontCamera, backCamera;
 
+    private MediaPlayer mediaPlayer;
+    private AudioManager audioManager;
+
     private boolean backFrontSwapped = false;
 
     private final String IMAGE_DIR = Paths.get(
@@ -79,6 +85,10 @@ public class MainActivity extends AppCompatActivity {
 
         // Clear all temp files upon starting this activity.
         deleteTempFiles();
+
+        // Initialize MediaPlayer to play camera sound effect
+        mediaPlayer = MediaPlayer.create(this, R.raw.camera);
+        audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
 
         // Initialize sub (smaller) preview view to preview back camera
         subPreviewView = findViewById(R.id.subPreviewView);
@@ -139,7 +149,7 @@ public class MainActivity extends AppCompatActivity {
             return true;
         });
 
-        if (allPermissionsGranted()) {
+        if(allPermissionsGranted()) {
             startCamera();
         } else {
             ActivityCompat.requestPermissions(
@@ -243,7 +253,8 @@ public class MainActivity extends AppCompatActivity {
         imageCount++;
     }
 
-    private void goToPreview(String frontFilePath, String backFilePath) {
+    private void onCapture(String frontFilePath, String backFilePath) {
+        playSoundEffect();
         flashOverlay.flash();
 
         Intent intent = new Intent(this, CapturePreviewActivity.class);
@@ -275,7 +286,7 @@ public class MainActivity extends AppCompatActivity {
             public void onImageSaved(@NonNull ImageCapture.OutputFileResults outputFileResults) {
                 incrementImageCount();
                 if(imageCount == 2) {
-                    goToPreview(frontFilePath, backFilePath);
+                    onCapture(frontFilePath, backFilePath);
                 }
             }
 
@@ -289,7 +300,7 @@ public class MainActivity extends AppCompatActivity {
             public void onImageSaved(@NonNull ImageCapture.OutputFileResults outputFileResults) {
                 incrementImageCount();
                 if(imageCount == 2) {
-                    goToPreview(frontFilePath, backFilePath);
+                    onCapture(frontFilePath, backFilePath);
                 }
             }
 
@@ -298,6 +309,23 @@ public class MainActivity extends AppCompatActivity {
                 exception.printStackTrace();
             }
         });
+    }
+
+    private void playSoundEffect() {
+        if(audioManager.getRingerMode() == AudioManager.RINGER_MODE_NORMAL && mediaPlayer != null) {
+            mediaPlayer.start();
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        // Release MediaPlayer resources
+        if(mediaPlayer != null) {
+            mediaPlayer.release();
+            mediaPlayer = null;
+        }
     }
 
     private void ensureDirectoriesExist() {

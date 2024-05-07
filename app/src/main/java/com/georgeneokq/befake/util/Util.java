@@ -2,6 +2,7 @@ package com.georgeneokq.befake.util;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Insets;
@@ -16,6 +17,8 @@ import android.view.WindowInsets;
 import android.view.WindowMetrics;
 
 import androidx.annotation.NonNull;
+
+import com.georgeneokq.befake.Globals;
 
 public class Util {
     public static void vibrateTap(Context ctx) {
@@ -50,23 +53,32 @@ public class Util {
     }
 
     public static Bitmap getRoundedCornerBitmap(Bitmap bitmap, int cornerRadius, int borderWidth, int borderColor) {
+        return getRoundedCornerBitmap(bitmap, cornerRadius, borderWidth, borderColor);
+    }
+
+    public static Bitmap getRoundedCornerBitmap(Bitmap bitmap, int cornerRadius, int borderWidth, int borderColor, int borderAlpha) {
         int width = bitmap.getWidth() + borderWidth * 2;
         int height = bitmap.getHeight() + borderWidth * 2;
 
         Bitmap output = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(output);
 
-        drawBorder(canvas, width, height, cornerRadius, borderWidth, borderColor);
+        drawBorder(canvas, width, height, cornerRadius, borderWidth, borderColor, borderAlpha);
         drawBitmap(canvas, bitmap, cornerRadius, borderWidth);
 
         return output;
     }
 
     private static void drawBorder(Canvas canvas, int width, int height, int cornerRadius, int borderWidth, int borderColor) {
+        drawBorder(canvas, width, height, cornerRadius, borderWidth, borderColor, 255);
+    }
+
+    private static void drawBorder(Canvas canvas, int width, int height, int cornerRadius, int borderWidth, int borderColor, int borderAlpha) {
         if (borderWidth > 0) {
             final Paint borderPaint = new Paint();
             borderPaint.setAntiAlias(true);
             borderPaint.setColor(borderColor);
+            borderPaint.setAlpha(borderAlpha);
 
             final RectF borderRect = new RectF(0, 0, width, height);
             final float[] borderRadii = {cornerRadius + borderWidth, cornerRadius + borderWidth, cornerRadius + borderWidth, cornerRadius + borderWidth, cornerRadius + borderWidth, cornerRadius + borderWidth, cornerRadius + borderWidth, cornerRadius + borderWidth};
@@ -103,5 +115,21 @@ public class Util {
             activity.getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
             return displayMetrics.heightPixels;
         }
+    }
+
+    public static void resetSettings(Context ctx) {
+        SharedPreferences prefs = ctx.getSharedPreferences(Globals.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putString("watermarkText", "BeFake.");
+        editor.putString("watermarkColor", "white");
+        editor.putInt("watermarkAlpha", 80);
+        editor.putString("borderColor", "black");
+        editor.putInt("borderAlpha", 100);
+        editor.apply();
+    }
+
+    public static boolean isSettingsInitialized(Context ctx) {
+        SharedPreferences prefs = ctx.getSharedPreferences(Globals.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
+        return prefs.contains("watermarkText");
     }
 }

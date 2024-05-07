@@ -4,6 +4,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.camera.core.impl.Config;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -43,10 +44,20 @@ public class CapturePreviewActivity extends AppCompatActivity {
     private boolean reverse;
     private boolean isWatermarked;
 
+    private String watermarkText, watermarkColor, borderColor;
+    private int watermarkAlpha, borderAlpha;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_capture_preview);
+
+        SharedPreferences prefs = getSharedPreferences(Globals.SHARED_PREFERENCES_NAME, MODE_PRIVATE);
+        watermarkText = prefs.getString("watermarkText", "");
+        watermarkColor = prefs.getString("watermarkColor", "");
+        watermarkAlpha = prefs.getInt("watermarkAlpha", 100);
+        borderColor = prefs.getString("borderColor", "");
+        borderAlpha = prefs.getInt("borderAlpha", 100);
 
         previewImageView = findViewById(R.id.previewImageView);
         btnDownload = findViewById(R.id.btnDownload);
@@ -113,7 +124,7 @@ public class CapturePreviewActivity extends AppCompatActivity {
                 Math.round(subBitmapWidth), Math.round(subBitmapHeight), true);
 
         // Round the corners of the sub camera bitmap
-        subCameraBitmap = Util.getRoundedCornerBitmap(subCameraBitmap, 100, 8, Color.BLACK);
+        subCameraBitmap = Util.getRoundedCornerBitmap(subCameraBitmap, 100, 8, Color.parseColor(borderColor), (int) (borderAlpha / 100.0f * 255));
 
         canvas.drawBitmap(subCameraBitmap, 45, 45, null);
 
@@ -121,13 +132,13 @@ public class CapturePreviewActivity extends AppCompatActivity {
             Paint textPaint = new Paint();
             textPaint.setTextAlign(Paint.Align.CENTER);
             textPaint.setTextSize(58);
-            textPaint.setColor(Color.WHITE);
-            textPaint.setAlpha(200);
+            textPaint.setColor(Color.parseColor(watermarkColor));
+            textPaint.setAlpha((int) (watermarkAlpha / 100.0f * 255));
             textPaint.setTypeface(Typeface.create(Typeface.SANS_SERIF, Typeface.BOLD));
             textPaint.setLetterSpacing(0.02f);
             int x = canvas.getWidth() / 2;
             int y = (int) ((canvas.getHeight() - 50) - ((textPaint.descent() + textPaint.ascent()) / 2));
-            canvas.drawText("BeFake.", x, y, textPaint);
+            canvas.drawText(watermarkText, x, y, textPaint);
         }
 
         previewImageView.setImageBitmap(canvasBitmap);
@@ -180,13 +191,5 @@ public class CapturePreviewActivity extends AppCompatActivity {
             e.printStackTrace();
             return null;
         }
-    }
-
-    private Bitmap addBorder(Bitmap bmp, int borderSize) {
-        Bitmap bmpWithBorder = Bitmap.createBitmap(bmp.getWidth() + borderSize * 2, bmp.getHeight() + borderSize * 2, bmp.getConfig());
-        Canvas canvas = new Canvas(bmpWithBorder);
-        canvas.drawColor(getResources().getColor(R.color.black, getTheme()));
-        canvas.drawBitmap(bmp, borderSize, borderSize, null);
-        return bmpWithBorder;
     }
 }

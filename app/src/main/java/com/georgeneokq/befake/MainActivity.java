@@ -66,6 +66,9 @@ public class MainActivity extends AppCompatActivity {
 
     private boolean backFrontSwapped = false;
 
+    // For dragging of subPreviewView
+    private float dX, dY;
+
     private final String IMAGE_DIR = Paths.get(
             Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM).getAbsolutePath(),
             "BeFake").toString();
@@ -131,9 +134,22 @@ public class MainActivity extends AppCompatActivity {
 
         subPreviewView.setOnTouchListener((v, event) -> {
             v.performClick();
+            float x = event.getRawX();
+            float y = event.getRawY();
             switch(event.getAction()) {
                 case MotionEvent.ACTION_DOWN:
-                    return true;
+                    // Get the initial position of the touch
+                    dX = v.getX() - x;
+                    dY = v.getY() - y;
+                    break;
+                case MotionEvent.ACTION_MOVE:
+                    // Calculate new position of the view based on the touch movement
+                    v.animate()
+                            .x(x + dX)
+                            .y(y + dY)
+                            .setDuration(0)
+                            .start();
+                    break;
                 case MotionEvent.ACTION_UP:
                     MeteringPointFactory factory = new DisplayOrientedMeteringPointFactory(
                             getDisplay(), backCamera.getCameraInfo(),

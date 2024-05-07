@@ -124,15 +124,27 @@ public class CapturePreviewActivity extends AppCompatActivity {
                 Math.round(subBitmapWidth), Math.round(subBitmapHeight), true);
 
         // Round the corners of the sub camera bitmap
-        subCameraBitmap = Util.getRoundedCornerBitmap(subCameraBitmap, 100, 8, Color.parseColor(borderColor), (int) (borderAlpha / 100.0f * 255));
+        int color;
+        try {
+            color = Color.parseColor(borderColor);
+        } catch(IllegalArgumentException e) {
+            color = 0x000000;
+        }
+        subCameraBitmap = Util.getRoundedCornerBitmap(subCameraBitmap, 100, 8, color, (int) (borderAlpha / 100.0f * 255));
 
         canvas.drawBitmap(subCameraBitmap, 45, 45, null);
 
         if(isWatermarked) {
+            try {
+                color = Color.parseColor(watermarkColor);
+            } catch(IllegalArgumentException e) {
+                color = 0xFFFFFF;
+            }
+
             Paint textPaint = new Paint();
             textPaint.setTextAlign(Paint.Align.CENTER);
             textPaint.setTextSize(58);
-            textPaint.setColor(Color.parseColor(watermarkColor));
+            textPaint.setColor(color);
             textPaint.setAlpha((int) (watermarkAlpha / 100.0f * 255));
             textPaint.setTypeface(Typeface.create(Typeface.SANS_SERIF, Typeface.BOLD));
             textPaint.setLetterSpacing(0.02f);

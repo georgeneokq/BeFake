@@ -64,13 +64,13 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Watermark alpha"
+                    android:text="Watermark alpha (%)"
                     android:textStyle="bold"/>
 
                 <EditText
                     android:id="@+id/editWatermarkAlpha"
                     android:inputType="number"
-                    android:hint="0-100 (%)"
+                    android:hint="0-100"
                     android:layout_weight="1"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content" />
@@ -85,7 +85,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Border alpha"
+                    android:text="Border color"
                     android:textStyle="bold"/>
 
                 <EditText
@@ -105,12 +105,12 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Border alpha"
+                    android:text="Border alpha (%)"
                     android:textStyle="bold"/>
 
                 <EditText
                     android:id="@+id/editBorderAlpha"
-                    android:hint="0-100 (%)"
+                    android:hint="0-100"
                     android:layout_weight="1"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content" />

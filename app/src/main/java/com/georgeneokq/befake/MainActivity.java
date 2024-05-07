@@ -91,6 +91,7 @@ public class MainActivity extends AppCompatActivity {
 
         btnSettings = findViewById(R.id.btnSettings);
         btnSettings.setOnClickListener(v -> {
+            Util.vibrateTapLight(this);
             Intent intent = new Intent(this, SettingsActivity.class);
             startActivity(intent);
         });

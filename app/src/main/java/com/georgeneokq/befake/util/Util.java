@@ -122,7 +122,7 @@ public class Util {
         SharedPreferences.Editor editor = prefs.edit();
         editor.putString("watermarkText", "BeFake.");
         editor.putString("watermarkColor", "white");
-        editor.putInt("watermarkAlpha", 80);
+        editor.putInt("watermarkAlpha", 60);
         editor.putString("borderColor", "black");
         editor.putInt("borderAlpha", 100);
         editor.apply();

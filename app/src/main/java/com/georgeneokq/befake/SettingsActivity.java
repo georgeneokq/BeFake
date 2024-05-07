@@ -31,7 +31,10 @@ public class SettingsActivity extends AppCompatActivity {
         btnResetSettings = findViewById(R.id.btnResetSettings);
         btnConfirm = findViewById(R.id.btnConfirm);
 
-        btnResetSettings.setOnClickListener(v -> resetSettings());
+        btnResetSettings.setOnClickListener(v -> {
+            Util.vibrateTapLight(this);
+            resetSettings();
+        });
         btnConfirm.setOnClickListener(v -> confirm());
 
         // Fill values from shared preferences

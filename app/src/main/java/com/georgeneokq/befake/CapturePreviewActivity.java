@@ -64,8 +64,14 @@ public class CapturePreviewActivity extends AppCompatActivity {
         btnReverse = findViewById(R.id.btnReverse);
         btnWatermark = findViewById(R.id.btnWatermark);
 
-        btnReverse.setOnClickListener(v -> toggleMainPreview());
-        btnWatermark.setOnClickListener(v -> toggleWatermark());
+        btnReverse.setOnClickListener(v -> {
+            Util.vibrateTapLight(this);
+            toggleMainPreview();
+        });
+        btnWatermark.setOnClickListener(v -> {
+            Util.vibrateTapLight(this);
+            toggleWatermark();
+        });
 
         toggleWatermark();
     }
@@ -159,7 +165,7 @@ public class CapturePreviewActivity extends AppCompatActivity {
         subCameraBitmap.recycle();
 
         btnDownload.setOnClickListener(v -> {
-            Util.vibrateTapLight(this);
+            Util.vibrateTap(this);
             String filePath = Paths.get(IMAGE_DIR, String.format("BeFake_%d.jpg", System.currentTimeMillis())).toString();
             saveBitmap(canvasBitmap, filePath);
             Toast.makeText(this, "Saved!", Toast.LENGTH_SHORT).show();

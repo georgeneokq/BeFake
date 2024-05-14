@@ -247,7 +247,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun onCapture(frontFilePath: String, backFilePath: String) {
-        playSoundEffect()
         flashOverlay.flash()
 
         val intent = Intent(this, CapturePreviewActivity::class.java)
@@ -300,6 +299,7 @@ class MainActivity : AppCompatActivity() {
         })
     }
 
+    // Temporarily not used.
     private fun playSoundEffect() {
         if (audioManager.ringerMode == AudioManager.RINGER_MODE_NORMAL) {
             mediaPlayer.start()

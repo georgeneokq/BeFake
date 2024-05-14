@@ -59,7 +59,7 @@
         android:id="@+id/flashOverlay"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="#F2FFFFFF"
+        android:background="#000000"
         android:visibility="gone" />
 
 </RelativeLayout>

@@ -46,6 +46,7 @@ class CapturePreviewActivity : AppCompatActivity() {
         Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM).absolutePath,
         "BeFake"
     ).toString()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_capture_preview)
@@ -69,6 +70,7 @@ class CapturePreviewActivity : AppCompatActivity() {
             toggleWatermark()
         }
         toggleWatermark()
+        setPreview()
     }
 
     private fun toggleMainPreview() {
@@ -83,7 +85,6 @@ class CapturePreviewActivity : AppCompatActivity() {
         } else {
             btnWatermark.setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.text))
         }
-        setPreview()
     }
 
     private fun setPreview() {
@@ -102,7 +103,7 @@ class CapturePreviewActivity : AppCompatActivity() {
 
         // Load front bitmap, account for rotation specified in EXIF
         var mainCameraBitmap = BitmapFactory.decodeFile(mainBitmapFilePath)
-        mainCameraBitmap = rotateBitmap(mainCameraBitmap, mainBitmapFilePath)
+        mainCameraBitmap = rotateBitmap(mainCameraBitmap, mainBitmapFilePath, isFrontCamera = !reverse)
 
         // The bitmap that the canvas will draw onto.
         val canvasBitmap = Bitmap.createBitmap(
@@ -111,7 +112,7 @@ class CapturePreviewActivity : AppCompatActivity() {
 
         // Load back bitmap, account for rotation specified in EXIF
         var subCameraBitmap = BitmapFactory.decodeFile(subBitmapFilePath)
-        subCameraBitmap = rotateBitmap(subCameraBitmap, subBitmapFilePath)
+        subCameraBitmap = rotateBitmap(subCameraBitmap, subBitmapFilePath, isFrontCamera = reverse)
 
         // Create canvas, draw front as main image, back as sub image
         val canvas = Canvas(canvasBitmap)
@@ -186,25 +187,26 @@ class CapturePreviewActivity : AppCompatActivity() {
             e.printStackTrace()
         }
     }
+    fun rotateBitmap(bitmap: Bitmap, filePath: String, isFrontCamera: Boolean = false): Bitmap {
+        val ei = ExifInterface(filePath)
+        val orientation = ei.getAttributeInt(
+            ExifInterface.TAG_ORIENTATION,
+            ExifInterface.ORIENTATION_UNDEFINED
+        )
 
-    private fun rotateBitmap(bitmap: Bitmap?, filePath: String?): Bitmap? {
-        return try {
-            val exifInterface = ExifInterface(filePath!!)
-            val orientation = exifInterface.getAttributeInt(
-                ExifInterface.TAG_ORIENTATION,
-                ExifInterface.ORIENTATION_UNDEFINED
-            )
-            val matrix = Matrix()
-            when (orientation) {
-                ExifInterface.ORIENTATION_ROTATE_90 -> matrix.setRotate(90f)
-                ExifInterface.ORIENTATION_ROTATE_180 -> matrix.setRotate(180f)
-                ExifInterface.ORIENTATION_ROTATE_270 -> matrix.setRotate(270f)
-                else -> return bitmap
-            }
-            Bitmap.createBitmap(bitmap!!, 0, 0, bitmap.width, bitmap.height, matrix, true)
-        } catch (e: IOException) {
-            e.printStackTrace()
-            null
+        val matrix = Matrix()
+
+        when (orientation) {
+            ExifInterface.ORIENTATION_ROTATE_90 -> matrix.postRotate(90f)
+            ExifInterface.ORIENTATION_ROTATE_180 -> matrix.postRotate(180f)
+            ExifInterface.ORIENTATION_ROTATE_270 -> matrix.postRotate(270f)
         }
+
+        // Flip horizontally if front camera
+        if (isFrontCamera) {
+            matrix.postScale(-1f, 1f)
+        }
+
+        return Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
     }
 }

@@ -146,7 +146,7 @@ object Util {
         val prefs = ctx.getSharedPreferences(Globals.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE)
         val editor = prefs.edit()
         editor.putString("watermarkText", "BeFake.")
-        editor.putString("watermarkColor", "white")
+        editor.putString("watermarkColor", "black")
         editor.putInt("watermarkAlpha", 65)
         editor.putInt("watermarkSize", 58)
         editor.putString("borderColor", "black")

@@ -40,6 +40,7 @@ android {
 
 dependencies {
 
+    implementation("androidx.exifinterface:exifinterface:1.3.6")
     val cameraxVersion = "1.3.3"
 
     implementation("androidx.appcompat:appcompat:1.6.1")

@@ -140,6 +140,42 @@
 
             </TableRow>
 
+            <!-- RadioGroup for selecting Maximize Quality or Minimize Latency -->
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Choose Performance Mode"
+                    android:textStyle="bold"/>
+
+                <RadioGroup
+                    android:id="@+id/radioGroup"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <!-- Maximize Quality RadioButton -->
+                    <RadioButton
+                        android:id="@+id/radioMaximizeQuality"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Maximize Quality"
+                        android:checked="true" />
+
+                    <!-- Minimize Latency RadioButton (default selected) -->
+                    <RadioButton
+                        android:id="@+id/radioMinimizeLatency"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Minimize Latency" />
+
+                </RadioGroup>
+            </TableRow>
+
             <TableRow
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
@@ -152,25 +188,6 @@
                     android:text="Reset Settings" />
 
             </TableRow>
-
-            <!-- Boolean Setting -->
-<!--            <TableRow-->
-<!--                android:layout_width="match_parent"-->
-<!--                android:layout_height="wrap_content"-->
-<!--                android:layout_marginTop="16dp">-->
-
-<!--            <TextView-->
-<!--                android:layout_width="wrap_content"-->
-<!--                android:layout_height="wrap_content"-->
-<!--                android:text="Boolean Setting 3:"-->
-<!--                android:textStyle="bold"/>-->
-
-<!--            <androidx.appcompat.widget.SwitchCompat-->
-<!--                android:layout_width="wrap_content"-->
-<!--                android:layout_height="wrap_content"-->
-<!--                android:checked="true"/>-->
-
-<!--            </TableRow>-->
 
         </TableLayout>
     </ScrollView>

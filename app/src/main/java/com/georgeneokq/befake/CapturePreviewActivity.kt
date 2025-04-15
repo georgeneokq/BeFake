@@ -21,7 +21,6 @@ import androidx.appcompat.content.res.AppCompatResources
 import com.georgeneokq.befake.util.Util
 import java.io.File
 import java.io.FileOutputStream
-import java.io.IOException
 import java.nio.file.Paths
 import kotlin.math.roundToInt
 

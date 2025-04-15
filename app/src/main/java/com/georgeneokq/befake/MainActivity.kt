@@ -212,13 +212,17 @@ class MainActivity : AppCompatActivity() {
                  val frontPreview = Preview.Builder().build()
                  frontPreview.setSurfaceProvider(frontSurfaceProvider)
 
+                 val prefs = getSharedPreferences(Globals.SHARED_PREFERENCES_NAME, MODE_PRIVATE)
+                 val highQuality = prefs.getBoolean("highQuality", true)
+                 val captureMode = if (highQuality) ImageCapture.CAPTURE_MODE_MAXIMIZE_QUALITY else ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY
+
                  // Set up image capture use case
                  backImageCapture = ImageCapture.Builder()
-                     .setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY)
+                     .setCaptureMode(captureMode)
                      .build()
 
                  frontImageCapture = ImageCapture.Builder()
-                     .setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY)
+                     .setCaptureMode(captureMode)
                      .build()
 
                  // Get front and back camera selectors

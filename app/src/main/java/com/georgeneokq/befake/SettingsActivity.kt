@@ -1,9 +1,13 @@
 package com.georgeneokq.befake
 
+import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
+import android.widget.RadioButton
+import android.widget.RadioGroup
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import com.georgeneokq.befake.util.Util
 
@@ -17,6 +21,10 @@ class SettingsActivity : AppCompatActivity() {
     private lateinit var editWatermarkSize: EditText
     private lateinit var editBorderColor: EditText
     private lateinit var editBorderAlpha: EditText
+    private lateinit var radioGroup: RadioGroup
+    private lateinit var radioMinimizeLatency: RadioButton
+    private lateinit var radioMaximizeQuality: RadioButton
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_settings)
@@ -31,6 +39,10 @@ class SettingsActivity : AppCompatActivity() {
         editBorderAlpha = findViewById(R.id.editBorderAlpha)
         btnResetSettings = findViewById(R.id.btnResetSettings)
         btnConfirm = findViewById(R.id.btnConfirm)
+
+        radioGroup = findViewById(R.id.radioGroup)
+        radioMinimizeLatency = findViewById(R.id.radioMinimizeLatency)
+        radioMaximizeQuality = findViewById(R.id.radioMaximizeQuality)
 
         btnResetSettings.setOnClickListener {
             Util.vibrateTapLight(this)
@@ -52,6 +64,20 @@ class SettingsActivity : AppCompatActivity() {
         editWatermarkSize.setText(watermarkSize.toString())
         editBorderColor.setText(borderColor)
         editBorderAlpha.setText(borderAlpha.toString())
+
+        // Retrieve and set the radio button state based on saved setting
+        val highQuality = prefs.getBoolean("highQuality", true)
+        if (highQuality) {
+            radioMaximizeQuality.isChecked = true
+        } else {
+            radioMinimizeLatency.isChecked = true
+        }
+
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                startActivity(Intent(this@SettingsActivity, MainActivity::class.java))
+            }
+        })
     }
 
     private fun resetSettings() {
@@ -68,6 +94,10 @@ class SettingsActivity : AppCompatActivity() {
         val borderColor = editBorderColor.text.toString()
         val borderAlpha = editBorderAlpha.text.toString().toInt()
 
+        // Get the selected performance mode
+        val selectedRadioButtonId = radioGroup.checkedRadioButtonId
+        val highQuality = selectedRadioButtonId == R.id.radioMaximizeQuality
+
         // Save to SharedPreferences
         val editor = prefs.edit()
         editor.putString("watermarkText", watermarkText)
@@ -76,7 +106,9 @@ class SettingsActivity : AppCompatActivity() {
         editor.putInt("watermarkSize", watermarkSize)
         editor.putString("borderColor", borderColor)
         editor.putInt("borderAlpha", borderAlpha)
+        editor.putBoolean("highQuality", highQuality)
         editor.apply()
-        finish()
+
+        startActivity(Intent(this, MainActivity::class.java))
     }
 }

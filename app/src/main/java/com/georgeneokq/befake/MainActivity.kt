@@ -97,6 +97,7 @@ class MainActivity : AppCompatActivity() {
         btnSettings.setOnClickListener {
             Util.vibrateTapLight(this)
             startActivity(Intent(this, SettingsActivity::class.java))
+            finish()
         }
 
         btnCapture = findViewById(R.id.btnCapture)

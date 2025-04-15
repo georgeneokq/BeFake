@@ -9,6 +9,7 @@ import android.media.MediaPlayer
 import android.os.Bundle
 import android.os.Environment
 import android.view.MotionEvent
+import android.view.View
 import android.widget.Button
 import android.widget.ImageButton
 import android.widget.Toast
@@ -31,6 +32,7 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var subPreviewView: PreviewView
     private lateinit var mainPreviewView: PreviewView
+    private lateinit var focusRing: View
 
     private lateinit var btnCapture: Button
     private lateinit var btnSettings: ImageButton
@@ -84,6 +86,9 @@ class MainActivity : AppCompatActivity() {
         // Initialize main (larger) preview view to preview front camera
         mainPreviewView = findViewById(R.id.mainPreviewView)
 
+        // Tap-to-focus indicator
+        focusRing = findViewById(R.id.focusRing)
+
         // View for flash effect
         flashOverlay = FlashOverlay(findViewById(R.id.flashOverlay))
 
@@ -100,6 +105,29 @@ class MainActivity : AppCompatActivity() {
             v.performClick()
             when(event.action) {
                 MotionEvent.ACTION_UP -> {
+                    v.performClick()
+
+                    val x = event.x
+                    val y = event.y
+
+                    // Center the focus ring at touch point
+                    focusRing.apply {
+                        val size = width / 2
+                        this.x = x - size
+                        this.y = y - size
+                        visibility = View.VISIBLE
+                        scaleX = 1f
+                        scaleY = 1f
+                        alpha = 1f
+
+                        animate()
+                            .scaleX(1.5f)
+                            .scaleY(1.5f)
+                            .alpha(0f)
+                            .setDuration(800)
+                            .withEndAction { visibility = View.GONE }
+                            .start()
+                    }
                     val factory = DisplayOrientedMeteringPointFactory(
                         this.display!!, frontCamera.cameraInfo,
                         mainPreviewView.width.toFloat(), mainPreviewView.height.toFloat()
@@ -186,11 +214,11 @@ class MainActivity : AppCompatActivity() {
 
                  // Set up image capture use case
                  backImageCapture = ImageCapture.Builder()
-                     .setCaptureMode(ImageCapture.CAPTURE_MODE_MAXIMIZE_QUALITY)
+                     .setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY)
                      .build()
 
                  frontImageCapture = ImageCapture.Builder()
-                     .setCaptureMode(ImageCapture.CAPTURE_MODE_MAXIMIZE_QUALITY)
+                     .setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY)
                      .build()
 
                  // Get front and back camera selectors
@@ -273,12 +301,10 @@ class MainActivity : AppCompatActivity() {
 
         frontImageCapture.takePicture(frontOutputFile, ContextCompat.getMainExecutor(this), object : ImageCapture.OnImageSavedCallback {
             override fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) {
-                Toast.makeText(this@MainActivity, "Front", Toast.LENGTH_SHORT).show()
                 playSoundEffect()
                 flashOverlay.flash {
                     backImageCapture.takePicture(backOutputFile, ContextCompat.getMainExecutor(this@MainActivity), object : ImageCapture.OnImageSavedCallback {
                         override fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) {
-                            Toast.makeText(this@MainActivity, "Back", Toast.LENGTH_SHORT).show()
                             playSoundEffect()
                             flashOverlay.flash()
                             incrementImageCount()

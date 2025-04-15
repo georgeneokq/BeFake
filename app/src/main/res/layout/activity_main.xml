@@ -8,6 +8,15 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
+    <!-- Focus Indicator View (initially hidden) -->
+    <View
+        android:id="@+id/focusRing"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:visibility="gone"
+        android:background="@drawable/focus_ring"
+        android:layout_centerInParent="true" />
+
     <!-- Sub SurfaceView for displaying front camera preview (by default). -->
     <androidx.camera.view.PreviewView
         android:id="@+id/subPreviewView"

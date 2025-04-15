@@ -68,8 +68,9 @@ class CapturePreviewActivity : AppCompatActivity() {
             Util.vibrateTapLight(this)
             toggleWatermark()
         }
+
+        // Calls setPreview() internally
         toggleWatermark()
-        setPreview()
     }
 
     private fun toggleMainPreview() {
@@ -84,6 +85,9 @@ class CapturePreviewActivity : AppCompatActivity() {
         } else {
             btnWatermark.setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.text))
         }
+
+        // Reflect the watermark change
+        setPreview()
     }
 
     private fun setPreview() {

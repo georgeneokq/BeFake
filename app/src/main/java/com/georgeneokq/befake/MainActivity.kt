@@ -151,7 +151,7 @@ class MainActivity : AppCompatActivity() {
             when(event.action) {
                 MotionEvent.ACTION_DOWN -> {
                     // Get the initial position of the touch
-                    dX = v.x - y
+                    dX = v.x - x
                     dY = v.y - y
                 }
                 MotionEvent.ACTION_MOVE -> {

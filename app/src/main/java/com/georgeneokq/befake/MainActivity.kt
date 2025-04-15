@@ -72,6 +72,8 @@ class MainActivity : AppCompatActivity() {
         // Clear all temp files upon starting this activity.
         deleteTempFiles()
 
+        ensureDirectoriesExist()
+
         // Initialize MediaPlayer to play camera sound effect
         mediaPlayer = MediaPlayer.create(this, R.raw.camera)
         audioManager = getSystemService(AUDIO_SERVICE) as AudioManager
@@ -247,8 +249,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun onCapture(frontFilePath: String, backFilePath: String) {
-        flashOverlay.flash()
-
         val intent = Intent(this, CapturePreviewActivity::class.java)
         intent.putExtra("frontFilePath", frontFilePath)
         intent.putExtra("backFilePath", backFilePath)
@@ -257,8 +257,6 @@ class MainActivity : AppCompatActivity() {
 
     private fun capture() {
         Util.vibrateTap(this)
-
-        ensureDirectoriesExist()
 
         // When image count hits 2, that means both cameras have completed capture operation
         imageCount = 0
@@ -275,18 +273,25 @@ class MainActivity : AppCompatActivity() {
 
         frontImageCapture.takePicture(frontOutputFile, ContextCompat.getMainExecutor(this), object : ImageCapture.OnImageSavedCallback {
             override fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) {
-                incrementImageCount()
-                if (imageCount == 2) {
-                    onCapture(frontFilePath, backFilePath)
-                }
-            }
+                Toast.makeText(this@MainActivity, "Front", Toast.LENGTH_SHORT).show()
+                playSoundEffect()
+                flashOverlay.flash {
+                    backImageCapture.takePicture(backOutputFile, ContextCompat.getMainExecutor(this@MainActivity), object : ImageCapture.OnImageSavedCallback {
+                        override fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) {
+                            Toast.makeText(this@MainActivity, "Back", Toast.LENGTH_SHORT).show()
+                            playSoundEffect()
+                            flashOverlay.flash()
+                            incrementImageCount()
+                            if (imageCount == 2) {
+                                onCapture(frontFilePath, backFilePath)
+                            }
+                        }
 
-            override fun onError(exception: ImageCaptureException) {
-                exception.printStackTrace()
-            }
-        })
-        backImageCapture.takePicture(backOutputFile, ContextCompat.getMainExecutor(this), object : ImageCapture.OnImageSavedCallback {
-            override fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) {
+                        override fun onError(exception: ImageCaptureException) {
+                            exception.printStackTrace()
+                        }
+                    })
+                }
                 incrementImageCount()
                 if (imageCount == 2) {
                     onCapture(frontFilePath, backFilePath)

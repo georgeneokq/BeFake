@@ -1,6 +1,6 @@
 # BeFake
 
-A standalone Android camera app that captures simultaneous front and back camera photos and merges them into a single composite image with a customizable watermark — inspired by the BeReal camera feature.
+A standalone Android camera app that captures simultaneous front and back camera photos and merges them into a single composite image with a customizable watermark, inspired by the BeReal camera feature.
 
 English | [日本語](README_ja.md)
 
@@ -10,16 +10,16 @@ When you press the capture button, both the front and rear cameras take a photo 
 
 ## How It Stands Out from BeReal
 
-BeFake strips away everything BeReal isn't — no social network, no notifications, no trending times, no friends feed. It is purely the camera feature, rebuilt from scratch as a standalone app with full control over the output:
+BeFake strips away everything BeReal isn't: no social network, no notifications, no trending times, no friends feed. It is purely the camera feature, rebuilt from scratch as a standalone app with full control over the output:
 
-- **Customizable watermark text** — set any text string to appear at the bottom of the composite image (default: "BeFake.")
-- **Watermark color** — specify any color by name (e.g. `black`, `white`, `#FF5733`)
-- **Watermark opacity** — adjust alpha from 0 to 100
-- **Watermark font size** — set the text size to your liking
-- **Border color & opacity** — customize the border around the back-camera inset photo
-- **Capture quality mode** — choose between maximizing image quality or minimizing capture latency
-- **Reverse layout** — swap which camera is the main image and which is the inset after capture
-- **Toggle watermark on/off** — show or hide the watermark on the preview before saving
+- **Customizable watermark text**: set any text string to appear at the bottom of the composite image (default: "BeFake.")
+- **Watermark color**: specify any color by name (e.g. `black`, `white`, `#FF5733`)
+- **Watermark opacity**: adjust alpha from 0 to 100
+- **Watermark font size**: set the text size to your liking
+- **Border color & opacity**: customize the border around the back-camera inset photo
+- **Capture quality mode**: choose between maximizing image quality or minimizing capture latency
+- **Reverse layout**: swap which camera is the main image and which is the inset after capture
+- **Toggle watermark on/off**: show or hide the watermark on the preview before saving
 
 ## Tech Stack
 
@@ -48,12 +48,12 @@ No Play Store release exists — installation is via ADB/deployment from source 
 
 ```
 app/src/main/java/com/georgeneokq/befake/
-  MainActivity.kt          — Dual camera preview, capture logic, tap-to-focus, draggable inset
-  CapturePreviewActivity.kt — Composite image rendering, watermark drawing, save/reverse controls
-  SettingsActivity.kt      — Watermark and border customization UI
-  Globals.kt               — App-wide constants
-  util/Util.kt             — Vibration, rounded-canvas bitmap utilities, settings reset
-  components/FlashOverlay.kt — White flash animation on capture
+  MainActivity.kt          : Dual camera preview, capture logic, tap-to-focus, draggable inset
+  CapturePreviewActivity.kt : Composite image rendering, watermark drawing, save/reverse controls
+  SettingsActivity.kt      : Watermark and border customization UI
+  Globals.kt               : App-wide constants
+  util/Util.kt             : Vibration, rounded-canvas bitmap utilities, settings reset
+  components/FlashOverlay.kt : White flash animation on capture
 ```
 
 ## License
